@@ -1,0 +1,1 @@
+# simplify-ai-chrome-extension

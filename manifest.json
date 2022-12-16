@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+  "name": "My Extension",
+  "version": "1.0.0",
+  "permissions": ["activeTab", "fileSystem"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

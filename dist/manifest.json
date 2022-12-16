@@ -3,7 +3,7 @@
   "description": "Simplify pdfs with complicated wording.",
   "name": "SimplifyAI",
   "version": "1.0.0",
-  "permissions": ["activeTab", "contextMenus", "tabs", "scripting"],
+  "permissions": ["activeTab", "contextMenus", "scripting"],
   "background": {
     "service_worker": "background.js"
   },

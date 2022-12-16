@@ -1,0 +1,1 @@
+(()=>{"use strict";let e=!1;function t(e){document.body.style.backgroundColor=e}chrome.contextMenus.create({id:"simplify-gpt",title:"SimplifyGPT",contexts:["selection"]}),chrome.contextMenus.onClicked.addListener(((c,i)=>{e=!e;const n=e?"orange":"white";chrome.scripting.executeScript({target:{tabId:(null==i?void 0:i.id)?i.id:-1},func:t,args:[n]}).then()}))})();

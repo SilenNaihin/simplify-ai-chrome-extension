@@ -1,0 +1,1 @@
+(()=>{"use strict";chrome.runtime.onMessage.addListener(((t,e,o)=>{"SIMPLIFY_GPT"===t.type&&(console.log(t.data),alert("No text found. Select this option after right clicking on a textarea that contains text or on a selected portion of text."))}))})();

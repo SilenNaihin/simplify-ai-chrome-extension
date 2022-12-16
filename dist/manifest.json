@@ -3,10 +3,11 @@
   "description": "Simplify pdfs with complicated wording.",
   "name": "SimplifyAI",
   "version": "1.0.0",
-  "permissions": ["activeTab", "contextMenus", "scripting"],
+  "permissions": ["activeTab", "contextMenus", "tabs", "scripting"],
   "background": {
     "service_worker": "background.js"
   },
+  "content_scripts": [{ "matches": ["<all_urls>"], "js": ["content.js"] }],
   "action": {
     "default_icon": {
       "16": "logo192.png",

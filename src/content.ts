@@ -18,10 +18,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       message.data.tabID,
       {
         type: 'EXPLANATION',
-        data: message.data.selectionText,
+        data: { text: message.data.info.selectionText },
       },
       (response) => {
-        console.log('response', response.data);
+        console.log('response', response);
         restoreCursor();
       }
     );

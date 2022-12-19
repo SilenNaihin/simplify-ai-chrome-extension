@@ -1,11 +1,5 @@
 import { ChatGPTAPI, getOpenAIAuth } from 'chatgpt';
 
-let active = false;
-
-function makeOrange(color: string): void {
-  document.body.style.backgroundColor = color;
-}
-
 chrome.contextMenus.create({
   id: 'simplify-gpt',
   title: 'SimplifyGPT',
@@ -51,7 +45,7 @@ chrome.contextMenus.create({
 // Listen for when the user clicks on the context menu item
 
 const getResponse = async (text: string) => {
-  console.log('getRsponse', text);
+  console.log('getRsponse', text + 'hello world');
   return text + 'hello world';
 };
 
@@ -66,13 +60,14 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  console.log('hey');
-  sendResponse({ data: 'hello world' });
-  // if (message.type === 'EXPLANATION') {
-  //   console.log('before getresponse', message, sender);
-  //   await getResponse(message).then((explanation) => {
-  //     sendResponse({ data: explanation });
-  //   });
-  // }
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('beforeIf');
+  if (message.type === 'EXPLANATION') {
+    console.log('before getresponse', message, sender);
+    getResponse(message.data.text).then((explanation) => {
+      console.log('hey', explanation);
+      sendResponse({ data: explanation });
+    });
+    return true; // indicate that a response will be sent asynchronously
+  }
 });

@@ -1,10 +1,13 @@
+import './index.css';
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('before message type', message);
   if (message.type === 'SIMPLIFY_GPT') {
     showLoadingCursor();
     console.log(message.data);
     const range = document?.getSelection()?.getRangeAt(0);
     const span = document.createElement('span');
-    span.style.backgroundColor = 'yellow';
+    span.classList.add('highlight');
     if (range) {
       span.appendChild(range.extractContents());
       range.insertNode(span);
@@ -12,13 +15,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       //   range.insertNode(document.createTextNode('newValue'));
     }
 
-    console.log('message', message.data.info.selectionText);
+    console.log('message', message.data.selectionText);
 
     chrome.runtime.sendMessage(
-      message.data.tabID,
       {
         type: 'EXPLANATION',
-        data: { text: message.data.info.selectionText },
+        data: { text: message.data.selectionText },
       },
       (response) => {
         console.log('response', response);

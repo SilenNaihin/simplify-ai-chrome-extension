@@ -1,12 +1,6 @@
 import { ChatGPTAPI, getOpenAIAuth } from 'chatgpt';
 
-chrome.contextMenus.create({
-  id: 'simplify-gpt',
-  title: 'SimplifyGPT',
-  contexts: ['selection'], // Display the menu item when text is highlighted
-});
-
-// const getResponse = async (text: string) => {
+// export const getResponse = async (text: string) => {
 //   //   chrome.storage.sync.set(
 //   //     {
 //   //       email: 'your_email@example.com',
@@ -44,30 +38,7 @@ chrome.contextMenus.create({
 
 // Listen for when the user clicks on the context menu item
 
-const getResponse = async (text: string) => {
+export const getResponse = async (text: string) => {
   console.log('getRsponse', text + 'hello world');
   return text + 'hello world';
 };
-
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (tab?.id) {
-    // info.menuItemId === 'simplify-gpt' &&
-    // Send a message to the content script
-    chrome.tabs.sendMessage(tab.id, {
-      type: 'SIMPLIFY_GPT',
-      data: { info, tabId: tab.id },
-    });
-  }
-});
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('beforeIf');
-  if (message.type === 'EXPLANATION') {
-    console.log('before getresponse', message, sender);
-    getResponse(message.data.text).then((explanation) => {
-      console.log('hey', explanation);
-      sendResponse({ data: explanation });
-    });
-    return true; // indicate that a response will be sent asynchronously
-  }
-});

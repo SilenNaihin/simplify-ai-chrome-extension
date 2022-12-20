@@ -1,4 +1,10 @@
-import { getResponse } from './aiResponse';
+import { sendMessageFeedback } from './chatgpt.js';
+import {
+  KEY_ACCESS_TOKEN,
+  cache,
+  generateAnswers,
+  getAccessToken,
+} from './generate-answers';
 
 chrome.contextMenus.create({
   id: 'simplify-gpt',
@@ -18,14 +24,17 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   console.log('beforeIf');
   if (message.type === 'EXPLANATION') {
     console.log('before getresponse', message, sender);
-    getResponse(message.data.text).then((explanation) => {
-      console.log('hey', explanation);
-      sendResponse({ data: explanation });
-    });
-    return true; // indicate that a response will be sent asynchronously
+    try {
+      const response = await generateAnswers(message.data.text);
+      return response;
+    } catch (err: any) {
+      console.error(err);
+      sendResponse({ error: err.message });
+      cache.delete(KEY_ACCESS_TOKEN);
+    }
   }
 });

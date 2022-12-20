@@ -1,4 +1,6 @@
-import './index.css';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import HighlightCard from './HighlightCard';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('before message type', message);
@@ -6,14 +8,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     showLoadingCursor();
     console.log(message.data);
     const range = document?.getSelection()?.getRangeAt(0);
-    const span = document.createElement('span');
-    span.classList.add('highlight');
+    const component = React.createElement(HighlightCard, {
+      phrase: message.data.selectionText,
+    });
+    const container = document.createElement('span');
+
+    console.log('component, range', component, range, range?.extractContents());
     if (range) {
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
-      //   range.deleteContents();
-      //   range.insertNode(document.createTextNode('newValue'));
+      // render component into the container element
+      ReactDOM.render(component, container);
+      // insert container element into the DOM in place of the range object
+      range.insertNode(container);
     }
+    // component.appendChild(range.extractContents());
+    // range.insertNode(component);
+
+    // if (range) {
+    //   span.appendChild(range.extractContents());
+    //   range.insertNode(span);
+    //   //   range.deleteContents();
+    //   //   range.insertNode(document.createTextNode('newValue'));
+    // }
 
     console.log('message', message.data.selectionText);
 

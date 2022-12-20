@@ -20,28 +20,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // insert container element into the DOM in place of the range object
       range.insertNode(container);
     }
-    // component.appendChild(range.extractContents());
-    // range.insertNode(component);
-
-    // if (range) {
-    //   span.appendChild(range.extractContents());
-    //   range.insertNode(span);
-    //   //   range.deleteContents();
-    //   //   range.insertNode(document.createTextNode('newValue'));
-    // }
 
     console.log('message', message.data.selectionText);
 
-    chrome.runtime.sendMessage(
-      {
-        type: 'EXPLANATION',
-        data: { text: message.data.selectionText },
-      },
-      (response) => {
-        console.log('response', response);
-        restoreCursor();
-      }
-    );
+    restoreCursor();
+
+    // chrome.runtime.sendMessage(
+    //   {
+    //     type: 'EXPLANATION',
+    //     data: { text: message.data.selectionText },
+    //   },
+    //   (response) => {
+    //     console.log('response', response);
+
+    //   }
+    // );
   }
 });
 

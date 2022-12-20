@@ -23,6 +23,8 @@
     "ora": "^6.1.2",
     "puppeteer": "^19.4.1",
     "react-dom": "^18.2.0",
+    "react-markdown": "^8.0.4",
+    "rehype-highlight": "^6.0.0",
     "style-loader": "^3.3.1",
     "styled-components": "^5.3.6"
   },

@@ -1,10 +1,4 @@
-import { sendMessageFeedback } from './chatgpt.js';
-import {
-  KEY_ACCESS_TOKEN,
-  cache,
-  generateAnswers,
-  getAccessToken,
-} from './generate-answers';
+import { KEY_ACCESS_TOKEN, cache, generateAnswers } from './generate-answers';
 
 chrome.contextMenus.create({
   id: 'simplify-gpt',
@@ -24,17 +18,29 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 });
 
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  console.log('beforeIf');
-  if (message.type === 'EXPLANATION') {
-    console.log('before getresponse', message, sender);
+// chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+//   if (message.type === 'EXPLANATION') {
+//     console.log('before getresponse', message, sender);
+//     try {
+//       const response = await generateAnswers(message.data.text);
+//       return response;
+//     } catch (err: any) {
+//       console.error(err);
+//       sendResponse({ error: err.message });
+//       cache.delete(KEY_ACCESS_TOKEN);
+//     }
+//   }
+// });
+
+chrome.runtime.onConnect.addListener((port) => {
+  port.onMessage.addListener(async (msg) => {
+    console.debug('received msg', msg);
     try {
-      const response = await generateAnswers(message.data.text);
-      return response;
+      await generateAnswers(port, msg.question);
     } catch (err: any) {
       console.error(err);
-      sendResponse({ error: err.message });
+      port.postMessage({ error: err.message });
       cache.delete(KEY_ACCESS_TOKEN);
     }
-  }
+  });
 });

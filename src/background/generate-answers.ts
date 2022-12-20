@@ -21,12 +21,15 @@ export async function getAccessToken() {
   return data.accessToken;
 }
 
-export async function generateAnswers(question: string) {
+export async function generateAnswers(port: any, question: string) {
   const accessToken = await getAccessToken();
 
-  console.log(accessToken);
-
   const controller = new AbortController();
+  port.onDisconnect.addListener(() => {
+    controller.abort();
+  });
+
+  console.log(accessToken);
 
   await fetchSSE('https://chat.openai.com/backend-api/conversation', {
     method: 'POST',
@@ -60,11 +63,11 @@ export async function generateAnswers(question: string) {
       const text = data.message?.content?.parts?.[0];
       if (text) {
         console.log('TEXT FROM CHATGPT', text);
-        return {
+        port.postMessage({
           text,
           messageId: data.message.id,
           conversationId: data.conversation_id,
-        };
+        });
       }
     },
   });

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "description": "Simplify pdfs with complicated wording.",
   "name": "SimplifyAI",
-  "version": "1.0.0",
+  "version": "1.9.0",
   "permissions": ["activeTab", "contextMenus", "tabs", "scripting"],
   "background": {
     "service_worker": "background.js"

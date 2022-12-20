@@ -48,12 +48,9 @@ const GPTResponse = ({ phrase }: GPTResponse) => {
 
   if (answer) {
     return (
-      <div>
-        <Header>ChatGPT</Header>
-        <ReactMarkdown rehypePlugins={[[rehypeHighlight, { detect: true }]]}>
-          {answer.text}
-        </ReactMarkdown>
-      </div>
+      <ReactMarkdown rehypePlugins={[[rehypeHighlight, { detect: true }]]}>
+        {answer.text}
+      </ReactMarkdown>
     );
   }
 
@@ -77,10 +74,10 @@ const GPTResponse = ({ phrase }: GPTResponse) => {
 export default GPTResponse;
 
 const pulseText = keyframes`
-  from {
+  0%, 100% {
     opacity: 1;
   }
-  to {
+  50% {
     opacity: 0.5;
   }
 }
@@ -89,9 +86,6 @@ const pulseText = keyframes`
 const Loading = styled.div`
   color: #b6b8ba;
   animation: ${pulseText} 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-`;
-
-const Header = styled.div`
-  font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  margin-top: 8px;
 `;

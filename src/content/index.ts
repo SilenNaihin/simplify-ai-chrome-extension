@@ -7,7 +7,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'SIMPLIFY_GPT') {
     showLoadingCursor();
     console.log(message.data);
-    const range = document?.getSelection()?.getRangeAt(0);
+    const selection = document?.getSelection();
+    const range = selection?.getRangeAt(0);
     const component = React.createElement(HighlightCard, {
       phrase: message.data.selectionText,
     });
@@ -21,20 +22,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       range.insertNode(container);
     }
 
-    console.log('message', message.data.selectionText);
+    selection?.removeAllRanges();
 
     restoreCursor();
-
-    // chrome.runtime.sendMessage(
-    //   {
-    //     type: 'EXPLANATION',
-    //     data: { text: message.data.selectionText },
-    //   },
-    //   (response) => {
-    //     console.log('response', response);
-
-    //   }
-    // );
   }
 });
 

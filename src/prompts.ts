@@ -9,7 +9,15 @@ const prompts: any = {
   },
   addOns: {
     minJargon: 'Make sure to minimize jargon.',
-    concise: 'Make sure to be concise.',
+    resources: 'Give me 3 links for further exploration and understanding.',
+    synonym: 'Give me a related synonym to connect to other contexts.',
+  },
+  size: {
+    simple: 'Max 1 sentence.',
+    small: 'Max 3 sentences.',
+    medium: 'Max 1 paragraph.',
+    large: 'Max 3 paragraphs.',
+    unlimited: 'Explain in depth.',
   },
   followUps: {
     tryAgain: {

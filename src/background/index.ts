@@ -8,7 +8,6 @@ chrome.contextMenus.create({
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   console.log(info, tab);
-  // info.menuItemId === 'simplify-gpt' &&
   // Send a message to the content script
   if (tab?.id) {
     chrome.tabs.sendMessage(tab.id, {
@@ -17,20 +16,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     });
   }
 });
-
-// chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-//   if (message.type === 'EXPLANATION') {
-//     console.log('before getresponse', message, sender);
-//     try {
-//       const response = await generateAnswers(message.data.text);
-//       return response;
-//     } catch (err: any) {
-//       console.error(err);
-//       sendResponse({ error: err.message });
-//       cache.delete(KEY_ACCESS_TOKEN);
-//     }
-//   }
-// });
 
 chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener(async (msg) => {

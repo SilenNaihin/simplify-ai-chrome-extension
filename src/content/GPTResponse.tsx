@@ -16,22 +16,23 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    const port = chrome.runtime.connect();
-    const listener = (msg: any) => {
-      if (msg.text) {
-        setAnswer(msg);
-      } else if (msg.error) {
-        setError(msg.error);
-      } else {
-        setError('EXCEPTION');
-      }
-    };
-    port.onMessage.addListener(listener);
-    port.postMessage({ question: phrase });
-    return () => {
-      port.onMessage.removeListener(listener);
-      port.disconnect();
-    };
+    // const port = chrome.runtime.connect();
+    // const listener = (msg: any) => {
+    //   if (msg.text) {
+    //     setAnswer(msg);
+    //   } else if (msg.error) {
+    //     setError(msg.error);
+    //   } else {
+    //     setError('EXCEPTION');
+    //   }
+    // };
+    // port.onMessage.addListener(listener);
+    // port.postMessage({ question: phrase });
+    // return () => {
+    //   port.onMessage.removeListener(listener);
+    //   port.disconnect();
+    // };
+    setError('EXCEPTION');
   }, [phrase, retry]);
 
   // retry error on focus
@@ -55,6 +56,8 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
       'font-size': '14px !important',
       'text-decoration': 'none !important',
       color: '#000 !important',
+      overflow: 'auto !important',
+      'white-space': 'normal !important',
     },
   };
 
@@ -120,6 +123,17 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
           strong: ({ node, ...props }) => (
             <strong style={{ all: 'revert', ...styles.general }} {...props} />
           ),
+          code: ({ node, ...props }) => (
+            <code
+              style={{
+                all: 'revert',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all',
+                ...styles.general,
+              }}
+              {...props}
+            />
+          ),
         }}
         rehypePlugins={[[rehypeHighlight, { detect: true }]]}
       />
@@ -137,7 +151,17 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
     );
   }
   if (error == 'EXCEPTION') {
-    return <ResponseText>Failed to load response from ChatGPT</ResponseText>;
+    return (
+      <ResponseText>
+        Failed to load response from ChatGPTFailed to load response from
+        ChatGPTFailed to load response from ChatGPTFailed to load response from
+        ChatGPTFailed to load response from ChatGPTFailed to load response from
+        ChatGPT Failed to load response from ChatGPTFailed to load response from
+        ChatGPTFailed to load response from ChatGPTFailed to load response from
+        ChatGPTFailed to load response from ChatGPTFailed to load response from
+        ChatGPT
+      </ResponseText>
+    );
   }
 
   if (error) {
@@ -165,6 +189,7 @@ const Loading = styled.div`
   animation: ${pulseText} 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   margin-bottom: 12px !important;
   margin-top: 8px !important;
+  white-space: normal !important;
 `;
 
 const ResponseText = styled.div`
@@ -175,4 +200,5 @@ const ResponseText = styled.div`
   font-size: 14px !important;
   text-decoration: none !important;
   color: #000 !important;
+  white-space: normal !important;
 `;

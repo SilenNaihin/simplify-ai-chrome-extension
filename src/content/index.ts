@@ -28,6 +28,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // insert container element into the DOM in place of the range object
       range.insertNode(container);
     }
+    document.body.style.transform = 'scale(1)';
 
     selection?.removeAllRanges();
 

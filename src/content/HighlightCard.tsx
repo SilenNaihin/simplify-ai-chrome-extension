@@ -14,7 +14,7 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
   useOutsideAlerter(textRef, () => setClicked(false));
 
   return (
-    <span ref={textRef}>
+    <Span ref={textRef}>
       <OriginalText onClick={() => setClicked(!clicked)} click={clicked}>
         {phrase + ' '}
       </OriginalText>
@@ -22,11 +22,15 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
         <Header>ChatGPT</Header>
         <GPTResponse phrase={phrase} clicked={clicked} />
       </HoverContainer>
-    </span>
+    </Span>
   );
 };
 
 export default HighlightCard;
+
+const Span = styled.span`
+  position: relative;
+`;
 
 interface OriginalText {
   click: boolean;
@@ -52,16 +56,17 @@ const HoverContainer = styled.div<HoverContainer>`
   font-size: 14px !important;
   text-decoration: none !important;
   color: #000 !important;
+  overflow: auto !important;
+  white-space: normal !important;
 
   @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
   font-family: font-family: 'Lato', sans-serif !important;
 
-  position: absolute !important;
+  position: fixed !important;
   
   border-radius: 8px !important;
   
   padding: 12px 10px !important;
-  overflow: auto !important;
   border: 1px solid black !important;
   
   z-index: 2147483647 !important;

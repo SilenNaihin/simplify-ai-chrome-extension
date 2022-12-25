@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
+import { ResponseInt } from './ResponseInterface';
 
 interface GPTResponse {
   phrase: string;
+  clicked: boolean;
 }
 
-const GPTResponse = ({ phrase }: GPTResponse) => {
+const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
   const [answer, setAnswer] = useState<any>(null);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
@@ -18,7 +20,7 @@ const GPTResponse = ({ phrase }: GPTResponse) => {
     const listener = (msg: any) => {
       if (msg.text) {
         setAnswer(msg);
-      } else if (msg.error === 'UNAUTHORIZED' || msg.error === 'CLOUDFLARE') {
+      } else if (msg.error) {
         setError(msg.error);
       } else {
         setError('EXCEPTION');
@@ -37,35 +39,109 @@ const GPTResponse = ({ phrase }: GPTResponse) => {
     const onFocus = () => {
       if (error && error !== 'EXCEPTION') {
         setError('');
-        setRetry((r) => r + 1);
+        setRetry(retry + 1);
       }
     };
     window.addEventListener('focus', onFocus);
     return () => {
       window.removeEventListener('focus', onFocus);
     };
-  }, [error]);
+  }, [error, clicked]);
+
+  const styles = {
+    general: {
+      'line-height': '1.5 !important',
+      'text-align': 'left !important',
+      'font-size': '14px !important',
+      'text-decoration': 'none !important',
+      color: '#000 !important',
+    },
+  };
 
   if (answer) {
+    console.log(answer);
     return (
-      <ReactMarkdown rehypePlugins={[[rehypeHighlight, { detect: true }]]}>
-        {answer.text}
-      </ReactMarkdown>
+      <ReactMarkdown
+        children={answer.text}
+        components={{
+          h1: ({ node, ...props }) => (
+            <h1 style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          h2: ({ node, ...props }) => (
+            <h2 style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          h3: ({ node, ...props }) => (
+            <h3 style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          h4: ({ node, ...props }) => (
+            <h4 style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          h5: ({ node, ...props }) => (
+            <h5 style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          h6: ({ node, ...props }) => (
+            <h6 style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          p: ({ node, ...props }) => (
+            <p
+              style={{
+                all: 'revert',
+                fontWeight: 'initial',
+                ...styles.general,
+              }}
+              {...props}
+            />
+          ),
+          pre: ({ node, ...props }) => (
+            <pre style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          span: ({ node, ...props }) => (
+            <span style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          em: ({ node, ...props }) => (
+            <em style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          a: ({ node, ...props }) => <a style={{ all: 'revert' }} {...props} />,
+          img: ({ node, ...props }) => (
+            <img style={{ all: 'revert' }} {...props} />
+          ),
+          hr: ({ node, ...props }) => (
+            <hr style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          li: ({ node, ...props }) => (
+            <li style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          ol: ({ node, ...props }) => (
+            <ol style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          ul: ({ node, ...props }) => (
+            <ul style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+          strong: ({ node, ...props }) => (
+            <strong style={{ all: 'revert', ...styles.general }} {...props} />
+          ),
+        }}
+        rehypePlugins={[[rehypeHighlight, { detect: true }]]}
+      />
     );
   }
 
   if (error === 'UNAUTHORIZED' || error === 'CLOUDFLARE') {
     return (
-      <p>
+      <ResponseText>
         Please login and pass Cloudflare check at{' '}
         <a href='https://chat.openai.com' target='_blank' rel='noreferrer'>
           chat.openai.com
         </a>
-      </p>
+      </ResponseText>
     );
   }
+  if (error == 'EXCEPTION') {
+    return <ResponseText>Failed to load response from ChatGPT</ResponseText>;
+  }
+
   if (error) {
-    return <p>Failed to load response from ChatGPT</p>;
+    return <ResponseText>{error}</ResponseText>;
   }
 
   return <Loading>Waiting for ChatGPT response...</Loading>;
@@ -84,8 +160,19 @@ const pulseText = keyframes`
 `;
 
 const Loading = styled.div`
-  color: #b6b8ba;
+  all: revert;
+  color: #b6b8ba !important;
   animation: ${pulseText} 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  margin-bottom: 12px;
-  margin-top: 8px;
+  margin-bottom: 12px !important;
+  margin-top: 8px !important;
+`;
+
+const ResponseText = styled.div`
+  all: revert;
+  font-weight: normal !important;
+  line-height: 1.5 !important;
+  text-align: left !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+  color: #000 !important;
 `;

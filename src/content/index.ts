@@ -9,13 +9,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log(message.data);
     const selection = document?.getSelection();
     const range = selection?.getRangeAt(0);
-    const component = React.createElement(HighlightCard, {
-      phrase: message.data.selectionText,
-    });
-    const container = document.createElement('span');
 
-    console.log('component, range', component, range, range?.extractContents());
     if (range) {
+      const component = React.createElement(HighlightCard, {
+        phrase: message.data.selectionText,
+        // range: range,
+      });
+      const container = document.createElement('span');
+
+      console.log(
+        'component, range',
+        component,
+        range,
+        range?.extractContents()
+      );
       // render component into the container element
       ReactDOM.render(component, container);
       // insert container element into the DOM in place of the range object

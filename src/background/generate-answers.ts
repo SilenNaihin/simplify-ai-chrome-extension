@@ -1,11 +1,12 @@
 import { fetchSSE } from './fetch-sse';
 import { v4 as uuidv4 } from 'uuid';
 import ExpiryMap from 'expiry-map';
+import { setConversationProperty } from './connection';
 
 export const KEY_ACCESS_TOKEN = 'accessToken';
 export const cache = new ExpiryMap(10 * 1000);
 
-export async function getAccessToken() {
+async function getAccessToken(): Promise<string> {
   if (cache.get(KEY_ACCESS_TOKEN)) {
     return cache.get(KEY_ACCESS_TOKEN);
   }
@@ -21,8 +22,20 @@ export async function getAccessToken() {
   return data.accessToken;
 }
 
-export async function generateAnswers(port: any, question: string) {
+export async function generateAnswers(
+  port: chrome.runtime.Port,
+  question: string
+) {
   const accessToken = await getAccessToken();
+
+  let conversationId: string | undefined;
+  const deleteConversation = () => {
+    if (conversationId) {
+      setConversationProperty(accessToken, conversationId, {
+        is_visible: false,
+      });
+    }
+  };
 
   const controller = new AbortController();
   port.onDisconnect.addListener(() => {
@@ -53,21 +66,30 @@ export async function generateAnswers(port: any, question: string) {
       model: 'text-davinci-002-render',
       parent_message_id: uuidv4(),
     }),
-    onMessage(message: string) {
-      console.log('SSE MESSAGE', message);
-      if (message === '[DONE]') {
-        console.log('MESSAGE DONE');
-        return;
-      }
-      const data = JSON.parse(message);
-      const text = data.message?.content?.parts?.[0];
-      if (text) {
-        console.log('TEXT FROM CHATGPT', text);
+    onMessage(message: string, error?: boolean) {
+      if (error) {
+        console.log('SSE ERROR', message);
         port.postMessage({
-          text,
-          messageId: data.message.id,
-          conversationId: data.conversation_id,
+          message,
         });
+        return;
+      } else {
+        if (message === '[DONE]') {
+          console.log('SSE MESSAGE DONE', message);
+          deleteConversation();
+          return;
+        }
+        const data = JSON.parse(message);
+        const text = data.message?.content?.parts?.[0];
+        conversationId = data.conversation_id;
+        if (text) {
+          console.log('TEXT FROM CHATGPT', text);
+          port.postMessage({
+            text,
+            messageId: data.message.id,
+            conversationId: data.conversation_id,
+          });
+        }
       }
     },
   });

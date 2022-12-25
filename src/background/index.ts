@@ -19,7 +19,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener(async (msg) => {
-    console.debug('received msg', msg);
+    console.log('received msg', msg);
     try {
       await generateAnswers(port, msg.question);
     } catch (err: any) {

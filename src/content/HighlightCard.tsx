@@ -58,6 +58,7 @@ const HoverContainer = styled.div<HoverContainer>`
   color: #000 !important;
   overflow: auto !important;
   white-space: normal !important;
+  contain: initial !important;
 
   @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
   font-family: font-family: 'Lato', sans-serif !important;

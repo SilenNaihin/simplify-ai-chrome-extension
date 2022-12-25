@@ -16,7 +16,7 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
   return (
     <Span ref={textRef}>
       <OriginalText onClick={() => setClicked(!clicked)} click={clicked}>
-        {phrase + ' '}
+        {phrase}
       </OriginalText>
       <HoverContainer show={clicked}>
         <Header>ChatGPT</Header>
@@ -43,7 +43,7 @@ const OriginalText = styled.span<OriginalText>`
 const Header = styled.div`
   font-weight: bold !important;
   font-size: 14px !important;
-  margin-bottom: -6px !important;
+  margin-bottom: !important;
 `;
 
 interface HoverContainer {

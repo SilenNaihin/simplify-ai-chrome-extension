@@ -44,11 +44,11 @@ export const useCalcBoxDim = (width: number) => {
 };
 
 export const useScrollPosition = () => {
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState<number[]>([0, 0]);
 
   useEffect(() => {
     const updatePosition = () => {
-      setScrollPosition(window.pageYOffset);
+      setScrollPosition([window.pageYOffset, window.pageXOffset]);
     };
     window.addEventListener('scroll', updatePosition);
     updatePosition();

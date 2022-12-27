@@ -27,7 +27,7 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
   const textRef = useRef(null);
   useOutsideAlerter(textRef, () => setClicked(false));
 
-  useEffect(() => {
+  const updatePosition = () => {
     const root = document.documentElement;
     const rootRect = root.getBoundingClientRect();
 
@@ -39,16 +39,6 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
       const rootHeight = rootRect.height;
       const rootClientWidth = root.clientWidth;
 
-      console.log(
-        highlightRef.current.getBoundingClientRect(),
-        'rootWidth',
-        rootWidth,
-        'rootHeight',
-        rootHeight,
-        'rootClientWidth',
-        rootClientWidth
-      );
-
       // where the left side of the box will start
       let leftAdjustment = left;
 
@@ -57,7 +47,7 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
         while (leftAdjustment + boxWidth >= rootWidth) {
           leftAdjustment -= 1;
         }
-        // add 10px of padding for scrollbar
+        // add 25px of padding for scrollbar
         setLeftSide(leftAdjustment - 25);
         setPrevLeftSide(leftAdjustment - 25);
       } else {
@@ -74,7 +64,21 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
         setTopSide(top + 10);
       }
     }
-  }, [width, scrollPosition]);
+  };
+
+  useEffect(() => {
+    const startTime = performance.now();
+
+    const update = () => {
+      updatePosition();
+      window.requestAnimationFrame(update);
+    };
+    update();
+
+    const endTime = performance.now();
+    const elapsedTime = endTime - startTime;
+    console.log(`Elapsed time: ${elapsedTime}ms`);
+  }, [scrollPosition, width]);
 
   return (
     <Span ref={textRef}>
@@ -88,9 +92,9 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
       <HoverContainer
         maxHeight={boxMaxHeight}
         width={boxWidth}
+        show={clicked}
         leftSide={leftSide}
         top={topSide}
-        show={clicked}
       >
         <Header>ChatGPT</Header>
         <GPTResponse phrase={phrase} clicked={clicked} />
@@ -127,7 +131,7 @@ interface HoverContainer {
   width: number;
   maxHeight: number;
 }
-const HoverContainer = styled.div<HoverContainer>`
+const HoverContainer = React.memo(styled.div<HoverContainer>`
   all: revert;
   line-height: 1.5 !important;
   text-align: left !important;
@@ -144,6 +148,7 @@ const HoverContainer = styled.div<HoverContainer>`
   position: fixed !important;
   left: ${(p) => (p.leftSide ? `${p.leftSide}px` : 'unset')} !important;
   top: ${(p) => p.top}px !important;
+  transition: all 0.001s ease-out;
   
   border-radius: 8px !important;
   
@@ -167,4 +172,4 @@ const HoverContainer = styled.div<HoverContainer>`
 
   width: ${(p) => p.width}px !important;
   max-height: ${(p) => p.maxHeight}px !important;
-`;
+`);

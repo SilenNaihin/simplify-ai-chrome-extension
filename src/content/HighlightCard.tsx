@@ -1,52 +1,88 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import GPTResponse from './GPTResponse';
-import { useOutsideAlerter, useWindowSize, useCalcBoxDim } from './utils';
+import {
+  useOutsideAlerter,
+  useWindowSize,
+  useCalcBoxDim,
+  useScrollPosition,
+} from './utils';
 
 interface HighlightCard {
   phrase: string;
-  rectRange: DOMRect;
-  rootRect: DOMRect;
 }
 
-const HighlightCard = ({ phrase, rectRange, rootRect }: HighlightCard) => {
+const HighlightCard = ({ phrase }: HighlightCard) => {
   const [clicked, setClicked] = useState<boolean>(true);
   const [width] = useWindowSize();
   const [boxWidth, boxMaxHeight] = useCalcBoxDim(width);
   const [leftSide, setLeftSide] = useState<number>(0);
+  const [prevLeftSide, setPrevLeftSide] = useState<number>(0);
   const [topSide, setTopSide] = useState<number>(0);
+
+  const scrollPosition = useScrollPosition();
+
+  const highlightRef = useRef<HTMLElement>(null);
 
   const textRef = useRef(null);
   useOutsideAlerter(textRef, () => setClicked(false));
 
   useEffect(() => {
-    `calculate the coordinates of the fixed box in relation to the bounding rect of the highlight `;
-    const { left, top, right, bottom } = rectRange;
-    const rootWidth = rootRect.width;
-    const rootHeight = rootRect.height;
+    const root = document.documentElement;
+    const rootRect = root.getBoundingClientRect();
 
-    // where the left side of the box will start
-    let rangeMiddle = (left + right) / 2;
+    if (highlightRef?.current) {
+      `calculate the coordinates of the fixed box in relation to the bounding rect of the highlight `;
+      const { left, top, right, bottom, width } =
+        highlightRef.current.getBoundingClientRect();
+      const rootWidth = rootRect.width;
+      const rootHeight = rootRect.height;
+      const rootClientWidth = root.clientWidth;
 
-    // this means the box is going off of the screen
-    while (rangeMiddle + boxWidth >= rootWidth) {
-      rangeMiddle -= 1;
+      console.log(
+        highlightRef.current.getBoundingClientRect(),
+        'rootWidth',
+        rootWidth,
+        'rootHeight',
+        rootHeight,
+        'rootClientWidth',
+        rootClientWidth
+      );
+
+      // where the left side of the box will start
+      let leftAdjustment = left;
+
+      if (right < rootClientWidth) {
+        // this means the box is going off of the screen, adjust it to the left
+        while (leftAdjustment + boxWidth >= rootWidth) {
+          leftAdjustment -= 1;
+        }
+        // add 10px of padding for scrollbar
+        setLeftSide(leftAdjustment - 25);
+        setPrevLeftSide(leftAdjustment - 25);
+      } else {
+        // if it's greater that means it is off screen even if it is still within
+        // the width of hte page. Snap to the right side of the highlight
+        setLeftSide(prevLeftSide);
+      }
+
+      // calculate where the top of the box will start.
+      if (bottom + boxMaxHeight < rootHeight) {
+        // + 10 for min padding
+        setTopSide(bottom + 10);
+      } else {
+        setTopSide(top + 10);
+      }
     }
-    // add 10px of padding
-    setLeftSide(rangeMiddle - 10);
-
-    // calculate where the top of the box will start.
-    if (bottom + boxMaxHeight < rootHeight) {
-      // + 10 for min padding
-      setTopSide(bottom + 10);
-    } else {
-      setTopSide(top + 10);
-    }
-  }, [width]);
+  }, [width, scrollPosition]);
 
   return (
     <Span ref={textRef}>
-      <OriginalText onClick={() => setClicked(!clicked)} click={clicked}>
+      <OriginalText
+        ref={highlightRef}
+        onClick={() => setClicked(!clicked)}
+        click={clicked}
+      >
         {phrase}
       </OriginalText>
       <HoverContainer
@@ -106,7 +142,7 @@ const HoverContainer = styled.div<HoverContainer>`
   font-family: font-family: 'Lato', sans-serif !important;
 
   position: fixed !important;
-  left: ${(p) => p.leftSide}px !important;
+  left: ${(p) => (p.leftSide ? `${p.leftSide}px` : 'unset')} !important;
   top: ${(p) => p.top}px !important;
   
   border-radius: 8px !important;

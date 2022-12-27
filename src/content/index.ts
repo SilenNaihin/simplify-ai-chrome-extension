@@ -11,13 +11,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const selection = document?.getSelection();
     const range = selection?.getRangeAt(0);
 
-    const rootRect = document.documentElement.getBoundingClientRect();
-
     if (range) {
       const component = React.createElement(HighlightCard, {
         phrase: message.data.selectionText,
-        rectRange: range.getBoundingClientRect(),
-        rootRect,
       });
       const container = document.createElement('span');
 

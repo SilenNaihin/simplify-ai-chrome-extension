@@ -10,7 +10,7 @@ const Popup = ({}: Popup) => {
 
 const PopupWrapper = styled.div`
   height: 50px;
-  width: 100px
+  width: 100px;
   display: flex;
   align-items: center;
   justify-content: center;

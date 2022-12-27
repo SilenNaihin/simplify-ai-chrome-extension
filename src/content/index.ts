@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import HighlightCard from './HighlightCard';
+import { removeContain } from './removeContain';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('before message type', message);
@@ -10,10 +11,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const selection = document?.getSelection();
     const range = selection?.getRangeAt(0);
 
+    const rootRect = document.documentElement.getBoundingClientRect();
+
     if (range) {
       const component = React.createElement(HighlightCard, {
         phrase: message.data.selectionText,
-        // range: range,
+        rectRange: range.getBoundingClientRect(),
+        rootRect,
       });
       const container = document.createElement('span');
 
@@ -28,36 +32,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // insert container element into the DOM in place of the range object
       range.insertNode(container);
 
-      const ancestor = range.commonAncestorContainer;
+      let ancestor = range.commonAncestorContainer;
 
-      const checkParentsInterval = 6;
-      let currentEl: any = ancestor;
+      removeContain({ ancestor, checkParentsInterval: 6 });
 
-      for (let x = 0; x < checkParentsInterval; x++) {
-        // console.log(currentEl);
-        if (currentEl.parentNode) {
-          currentEl = currentEl.parentNode;
+      let parent: any = ancestor.parentNode;
 
-          const cssClasses = currentEl.classList;
-
-          // console.log(cssClasses);
-
-          cssClasses.forEach((className: any) => {
-            const tempElement = document.createElement('div');
-            tempElement.classList.add(className);
-
-            const computedStyles = getComputedStyle(tempElement);
-
-            // console.log(className, computedStyles);
-
-            if (computedStyles.contain !== 'none') {
-              currentEl.style.contain = 'none';
-            }
-          });
-        }
+      while (!parent.innerHTML) {
+        parent = ancestor.parentNode;
       }
     }
-    document.body.style.transform = 'scale(1)';
 
     selection?.removeAllRanges();
 

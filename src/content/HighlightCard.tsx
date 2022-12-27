@@ -1,24 +1,61 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import GPTResponse from './GPTResponse';
-import { useOutsideAlerter } from './utils';
+import { useOutsideAlerter, useWindowSize, useCalcBoxDim } from './utils';
 
 interface HighlightCard {
   phrase: string;
+  rectRange: DOMRect;
+  rootRect: DOMRect;
 }
 
-const HighlightCard = ({ phrase }: HighlightCard) => {
+const HighlightCard = ({ phrase, rectRange, rootRect }: HighlightCard) => {
   const [clicked, setClicked] = useState<boolean>(true);
+  const [width] = useWindowSize();
+  const [boxWidth, boxMaxHeight] = useCalcBoxDim(width);
+  const [leftSide, setLeftSide] = useState<number>(0);
+  const [topSide, setTopSide] = useState<number>(0);
 
   const textRef = useRef(null);
   useOutsideAlerter(textRef, () => setClicked(false));
+
+  useEffect(() => {
+    `calculate the coordinates of the fixed box in relation to the bounding rect of the highlight `;
+    const { left, top, right, bottom } = rectRange;
+    const rootWidth = rootRect.width;
+    const rootHeight = rootRect.height;
+
+    // where the left side of the box will start
+    let rangeMiddle = (left + right) / 2;
+
+    // this means the box is going off of the screen
+    while (rangeMiddle + boxWidth >= rootWidth) {
+      rangeMiddle -= 1;
+    }
+    // add 10px of padding
+    setLeftSide(rangeMiddle - 10);
+
+    // calculate where the top of the box will start.
+    if (bottom + boxMaxHeight < rootHeight) {
+      // + 10 for min padding
+      setTopSide(bottom + 10);
+    } else {
+      setTopSide(top + 10);
+    }
+  }, [width]);
 
   return (
     <Span ref={textRef}>
       <OriginalText onClick={() => setClicked(!clicked)} click={clicked}>
         {phrase}
       </OriginalText>
-      <HoverContainer show={clicked}>
+      <HoverContainer
+        maxHeight={boxMaxHeight}
+        width={boxWidth}
+        leftSide={leftSide}
+        top={topSide}
+        show={clicked}
+      >
         <Header>ChatGPT</Header>
         <GPTResponse phrase={phrase} clicked={clicked} />
       </HoverContainer>
@@ -29,6 +66,7 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
 export default HighlightCard;
 
 const Span = styled.span`
+  all: inherit;
   position: relative;
 `;
 
@@ -48,6 +86,10 @@ const Header = styled.div`
 
 interface HoverContainer {
   show: boolean;
+  leftSide: number;
+  top: number;
+  width: number;
+  maxHeight: number;
 }
 const HoverContainer = styled.div<HoverContainer>`
   all: revert;
@@ -64,6 +106,8 @@ const HoverContainer = styled.div<HoverContainer>`
   font-family: font-family: 'Lato', sans-serif !important;
 
   position: fixed !important;
+  left: ${(p) => p.leftSide}px !important;
+  top: ${(p) => p.top}px !important;
   
   border-radius: 8px !important;
   
@@ -85,20 +129,6 @@ const HoverContainer = styled.div<HoverContainer>`
     background-color: #202124 !important;
   }
 
-  @media (max-width: 768px) {
-    width: 250px !important;
-    max-height: 125px !important;
-  }
-  @media (max-width: 1000px) {
-    width: 340px !important;
-    max-height: 170px !important;
-  }
-  @media (max-width: 1200px) {
-    width: 400px !important;
-    max-height: 200px !important;
-  }
-  @media (min-width: 1200px) {
-    width: 500px !important;
-    max-height: 230px !important;
-  }
+  width: ${(p) => p.width}px !important;
+  max-height: ${(p) => p.maxHeight}px !important;
 `;

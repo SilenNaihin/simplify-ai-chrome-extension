@@ -16,22 +16,22 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    // const port = chrome.runtime.connect();
-    // const listener = (msg: any) => {
-    //   if (msg.text) {
-    //     setAnswer(msg);
-    //   } else if (msg.error) {
-    //     setError(msg.error);
-    //   } else {
-    //     setError('EXCEPTION');
-    //   }
-    // };
-    // port.onMessage.addListener(listener);
-    // port.postMessage({ question: phrase });
-    // return () => {
-    //   port.onMessage.removeListener(listener);
-    //   port.disconnect();
-    // };
+    const port = chrome.runtime.connect();
+    const listener = (msg: any) => {
+      if (msg.text) {
+        setAnswer(msg);
+      } else if (msg.error) {
+        setError(msg.error);
+      } else {
+        setError('EXCEPTION');
+      }
+    };
+    port.onMessage.addListener(listener);
+    port.postMessage({ question: phrase });
+    return () => {
+      port.onMessage.removeListener(listener);
+      port.disconnect();
+    };
     setError('EXCEPTION');
   }, [phrase, retry]);
 
@@ -151,17 +151,7 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
     );
   }
   if (error == 'EXCEPTION') {
-    return (
-      <ResponseText>
-        Failed to load response from ChatGPTFailed to load response from
-        ChatGPTFailed to load response from ChatGPTFailed to load response from
-        ChatGPTFailed to load response from ChatGPTFailed to load response from
-        ChatGPT Failed to load response from ChatGPTFailed to load response from
-        ChatGPTFailed to load response from ChatGPTFailed to load response from
-        ChatGPTFailed to load response from ChatGPTFailed to load response from
-        ChatGPT
-      </ResponseText>
-    );
+    return <ResponseText>Failed to load response from ChatGPT</ResponseText>;
   }
 
   if (error) {

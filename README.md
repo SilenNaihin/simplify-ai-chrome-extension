@@ -21,10 +21,16 @@
   - Selecting across html elements. Selecting across different styles as you can see above destroys the formatting. Need to figure out how to maintain
     - [ ] styling
     - [ ] structure
-  - [ ] Add !important to styles and don’t assume any default styled or box text will take parent page styles
-  - [ ] Overflow hidden parent component hiding the gpt
-  - [ ] Z index box under other stuff
-  - [ ] No wrap text
+  - [x] Add !important to styles and don’t assume any default styled or box text will take parent page styles
+  - [x] Overflow hidden parent component hiding the gpt
+  - [x] Contain: layout paint hiding extension
+  - [x] Z index box under other stuff
+    - [ ] Z-index to be only 1 higher than the context it is in (to avoid it being overlayed on the searchbar on scroll)
+  - [x] No wrap text
+  - [x] z-index not working when static like on Twitter
+  - [x] Other layout bug on Google with overlay
+  - [ ] Not appearing for Notion
+  - [ ] Links click can’t open extension back up
 
 ### To install
 

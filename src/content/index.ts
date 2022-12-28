@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import HighlightCard from './HighlightCard';
-import { removeContain } from './removeContain';
+import { highlightText } from './highlightText';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('before message type', message);
@@ -10,38 +10,72 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log(message.data);
     const selection = document?.getSelection();
     const range = selection?.getRangeAt(0);
+    const selectionString = selection?.toString();
 
-    if (range) {
-      const component = React.createElement(HighlightCard, {
-        phrase: message.data.selectionText,
-      });
-      const container = document.createElement('span');
-
-      console.log(
-        'component, range',
-        component,
-        range,
-        range?.extractContents()
-      );
-      // render component into the container element
-      ReactDOM.render(component, container);
-      // insert container element into the DOM in place of the range object
-      range.insertNode(container);
-
-      let ancestor = range.commonAncestorContainer;
-
-      removeContain({ ancestor, checkParentsInterval: 6 });
-
-      let parent: any = ancestor.parentNode;
-
-      while (!parent.innerHTML) {
-        parent = ancestor.parentNode;
+    if (selection && range && selectionString) {
+      let ancestor: any = range.commonAncestorContainer;
+      // Sometimes the element will only be text. Get the parent in that case
+      // TODO: Is this really necessary?
+      while (!ancestor.innerHTML) {
+        ancestor = ancestor.parentNode;
       }
+
+      let highlightArray: number[] = [];
+
+      chrome.storage.sync.get('highlightArray', (items) => {
+        highlightArray = JSON.parse(items.myArray);
+      });
+
+      const key = highlightArray.length;
+      highlightArray.push(key);
+
+      chrome.storage.sync.set(
+        { highlightArray: JSON.stringify(highlightArray) },
+        () => {
+          console.log('Array is stored in Chrome storage');
+        }
+      );
+
+      // background-color: ${(p) => (p.click ? '#00d8ff' : '#55e1fa')} !important;
+      const highlightColor = '#55e1fa';
+
+      highlightText({
+        selectionString,
+        ancestor,
+        selection,
+        highlightColor,
+        key,
+      });
+
+      //   const component = React.createElement(HighlightCard, {
+      //     phrase: message.data.selectionText,
+      //     highlightRect: range.getBoundingClientRect(),
+      //   });
+      //   const container = document.createElement('span');
+
+      //   console.log(
+      //     'component, range',
+      //     component,
+      //     range,
+      //     range?.extractContents()
+      //   );
+      //   // render component into the container element
+      //   ReactDOM.render(component, container);
+      //   // insert container element into the DOM in place of the range object
+      //   range.insertNode(container);
+      // }
+
+      // Deselect text
+      if (selection.removeAllRanges) selection.removeAllRanges();
+
+      // Attach mouse hover event listeners to display tools when hovering a highlight
+      // const parent = ancestor.parent();
+      // parent.find(`.${HIGHLIGHT_CLASS}`).each((_i, el) => {
+      //   initializeHighlightEventListeners(el);
+      // });
+
+      restoreCursor();
     }
-
-    selection?.removeAllRanges();
-
-    restoreCursor();
   }
 });
 

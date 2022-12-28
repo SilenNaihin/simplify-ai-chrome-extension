@@ -10,9 +10,10 @@ import {
 
 interface HighlightCard {
   phrase: string;
+  highlightRect: DOMRect;
 }
 
-const HighlightCard = ({ phrase }: HighlightCard) => {
+const HighlightCard = ({ phrase, highlightRect }: HighlightCard) => {
   const [clicked, setClicked] = useState<boolean>(true);
   const [width] = useWindowSize();
   const [boxWidth, boxMaxHeight] = useCalcBoxDim(width);
@@ -22,8 +23,6 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
 
   const scrollPosition = useScrollPosition();
 
-  const highlightRef = useRef<HTMLElement>(null);
-
   const textRef = useRef(null);
   useOutsideAlerter(textRef, () => setClicked(false));
 
@@ -31,10 +30,9 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
     const root = document.documentElement;
     const rootRect = root.getBoundingClientRect();
 
-    if (highlightRef?.current) {
+    if (highlightRect) {
       `calculate the coordinates of the fixed box in relation to the bounding rect of the highlight `;
-      const { left, top, right, bottom, width } =
-        highlightRef.current.getBoundingClientRect();
+      const { left, top, right, bottom, width } = highlightRect;
       const rootWidth = rootRect.width;
       const rootHeight = rootRect.height;
       const rootClientWidth = root.clientWidth;
@@ -82,8 +80,10 @@ const HighlightCard = ({ phrase }: HighlightCard) => {
 
   return (
     <Span ref={textRef}>
+      {/* the highlight cannot go here, but has to have the useWindowSize */}
+
       <OriginalText
-        ref={highlightRef}
+        // key={key}
         onClick={() => setClicked(!clicked)}
         click={clicked}
       >
@@ -112,6 +112,7 @@ const Span = styled.span`
 
 interface OriginalText {
   click: boolean;
+  //   hover: boolean;
 }
 const OriginalText = styled.span<OriginalText>`
   background-color: ${(p) => (p.click ? '#00d8ff' : '#55e1fa')} !important;

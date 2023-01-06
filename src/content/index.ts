@@ -22,19 +22,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       let highlightArray: number[] = [];
 
-      chrome.storage.sync.get('highlightArray', (items) => {
-        highlightArray = JSON.parse(items.myArray);
-      });
+      // sync for syncing across dvices for the google account. add storage to manifest
+      // chrome.storage.local.get('highlightArray', (items) => {
+      //   highlightArray = items.highlightArray
+      //     ? JSON.parse(items.highlightArray)
+      //     : [];
+      // });
+      const storageValue = window.sessionStorage.getItem('highlightArray');
+      if (storageValue) {
+        highlightArray = JSON.parse(storageValue);
+      } else {
+        highlightArray = [];
+      }
+
+      console.log('got highlightArray', highlightArray);
 
       const key = highlightArray.length;
       highlightArray.push(key);
 
-      chrome.storage.sync.set(
-        { highlightArray: JSON.stringify(highlightArray) },
-        () => {
-          console.log('Array is stored in Chrome storage');
-        }
+      // chrome.storage.local.set(
+      //   { highlightArray: JSON.stringify(highlightArray) },
+      //   () => {
+      //     console.log('Array is stored in Chrome storage');
+      //   }
+      // );
+      window.sessionStorage.setItem(
+        'highlightArray',
+        JSON.stringify(highlightArray)
       );
+      console.log('Array is stored in Chrome storage', highlightArray);
 
       // background-color: ${(p) => (p.click ? '#00d8ff' : '#55e1fa')} !important;
       const highlightColor = '#55e1fa';
@@ -47,23 +63,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         key,
       });
 
-      //   const component = React.createElement(HighlightCard, {
-      //     phrase: message.data.selectionText,
-      //     highlightRect: range.getBoundingClientRect(),
-      //   });
-      //   const container = document.createElement('span');
+      const component = React.createElement(HighlightCard, {
+        phrase: message.data.selectionText,
+        highlightRect: range.getBoundingClientRect(),
+      });
+      const container = document.createElement('span');
 
-      //   console.log(
-      //     'component, range',
-      //     component,
-      //     range,
-      //     range?.extractContents()
-      //   );
-      //   // render component into the container element
-      //   ReactDOM.render(component, container);
-      //   // insert container element into the DOM in place of the range object
-      //   range.insertNode(container);
-      // }
+      console.log(
+        'component, range',
+        component,
+        range,
+        range?.extractContents()
+      );
+      // render component into the container element
+      ReactDOM.render(component, container);
+      // insert container element into the DOM in place of the range object
+      range.insertNode(container);
 
       // Deselect text
       if (selection.removeAllRanges) selection.removeAllRanges();
@@ -89,3 +104,7 @@ const showLoadingCursor = () => {
 const restoreCursor = () => {
   document?.getElementById('corsor_wait')?.remove();
 };
+
+window.addEventListener('beforeunload', () => {
+  window.sessionStorage.setItem('highlightArray', JSON.stringify([]));
+});

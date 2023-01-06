@@ -82,13 +82,13 @@ const HighlightCard = ({ phrase, highlightRect }: HighlightCard) => {
     <Span ref={textRef}>
       {/* the highlight cannot go here, but has to have the useWindowSize */}
 
-      <OriginalText
+      {/* <OriginalText
         // key={key}
         onClick={() => setClicked(!clicked)}
         click={clicked}
       >
         {phrase}
-      </OriginalText>
+      </OriginalText> */}
       <HoverContainer
         maxHeight={boxMaxHeight}
         width={boxWidth}

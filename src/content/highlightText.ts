@@ -48,12 +48,11 @@ export const highlightText = ({
     return false;
   }
 };
-
 interface RecursiveWrapper {
   ancestor: HTMLElement;
   highlightInfo: HighlightInfo;
-  startFound: boolean;
-  charsHighlighted: number;
+  startFound: any;
+  charsHighlighted: any;
 }
 
 export const recursiveWrapper = ({
@@ -70,7 +69,7 @@ export const recursiveWrapper = ({
     color,
     key,
     selectionString,
-  } = highlightInfo;
+  }: HighlightInfo = highlightInfo;
   const selectionLength = selectionString.length;
 
   // get parent of ancestor
@@ -80,23 +79,20 @@ export const recursiveWrapper = ({
   //     let element = ancestor.children[i];
   //     // logic here
   //   }
-  ancestor.querySelectorAll('*').forEach((_index, element) => {
+  Array.from(ancestor.childNodes).forEach((element) => {
+    const htmlElement = element as HTMLElement;
     if (charsHighlighted >= selectionLength) return; // Stop early if we are done highlighting
 
     if (element.nodeType !== Node.TEXT_NODE) {
       // Only look at visible nodes because invisible nodes aren't included in the selected text
-      // from the Window.getSelection() API
-      const jqElement = $(element);
-      if (
-        jqElement.is(':visible') &&
-        getComputedStyle(element).visibility !== 'hidden'
-      ) {
-        [startFound, charsHighlighted] = _recursiveWrapper(
-          jqElement,
+      const style = getComputedStyle(htmlElement);
+      if (style.display !== 'none' && style.visibility !== 'hidden') {
+        [startFound, charsHighlighted] = recursiveWrapper({
+          ancestor: htmlElement,
           highlightInfo,
           startFound,
-          charsHighlighted
-        );
+          charsHighlighted,
+        });
       }
       return;
     }
@@ -106,20 +102,21 @@ export const recursiveWrapper = ({
     // since you can highlight from left to right or right to left
     let startIndex = 0;
     if (!startFound) {
-      if (!anchor.is(element) && !focus.is(element)) return; // If the element is not the anchor or focus, continue
+      if (element !== anchor && element !== focus) return; // If the element is not the anchor or focus, continue
+      //  !(anchor instanceof HTMLElement) && !(focus instanceof HTMLElement);
 
       startFound = true;
       startIndex = Math.min(
         ...[
-          ...(anchor.is(element) ? [anchorOffset] : []),
-          ...(focus.is(element) ? [focusOffset] : []),
+          ...(element === anchor ? [anchorOffset] : []),
+          ...(element === focus ? [focusOffset] : []),
         ]
       );
     }
 
     // Step 2:
     // If we get here, we are in a text node, the start was found and we are not done highlighting
-    const { nodeValue, parentElement: parent } = element;
+    const { nodeValue, parentElement: parent }: any = htmlElement;
 
     if (startIndex > nodeValue.length) {
       // Start index is beyond the length of the text node, can't find the highlight
@@ -130,7 +127,7 @@ export const recursiveWrapper = ({
     }
 
     // Split the text content into three parts, the part before the highlight, the highlight and the part after the highlight:
-    const highlightTextEl = element.splitText(startIndex);
+    const highlightTextEl = nodeValue.splitText(startIndex);
 
     // Instead of simply blindly highlighting the text by counting characters,
     // we check if the text is the same as the selection string.

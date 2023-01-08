@@ -3,12 +3,12 @@ import styled from 'styled-components';
 import React from 'react';
 import { HIGHLIGHT_CLASS } from './utils';
 import ReactDOM from 'react-dom';
+import HighlightCard from './HighlightCard';
 
 interface HighlightText {
   selectionString: string;
   ancestor: HTMLElement;
   selection: Selection;
-  highlightColor: string;
   key: number;
 }
 
@@ -16,11 +16,9 @@ export const highlightText = ({
   selectionString,
   ancestor,
   selection,
-  highlightColor,
   key,
 }: HighlightText) => {
   const highlightInfo: HighlightInfo = {
-    color: highlightColor,
     selectionString: selectionString,
     anchor: selection.anchorNode,
     anchorOffset: selection.anchorOffset,
@@ -68,8 +66,6 @@ export const recursiveWrapper = ({
     focus,
     anchorOffset,
     focusOffset,
-    color,
-    key,
     selectionString,
   }: HighlightInfo = highlightInfo;
   const selectionLength = selectionString.length;
@@ -91,7 +87,10 @@ export const recursiveWrapper = ({
   // Array.from(ancestor.childNodes).forEach((element) => {
   //   const htmlElement = element as HTMLElement;
 
-  for (let x = 0; x < ancestor.childNodes.length; x++) {
+  // for (let x = 0; x < ancestor.childNodes.length; x++) {
+  //   const element = ancestor.childNodes[x];
+
+  Array.from(ancestor.childNodes).forEach((element, x) => {
     console.log('-------------------', x);
     console.log(
       'ancestor',
@@ -103,7 +102,7 @@ export const recursiveWrapper = ({
       'typeof',
       typeof ancestor.childNodes[x]
     );
-    const element = ancestor.childNodes[x];
+
     console.log('htmlElement', element);
     console.log(
       'charsHighlighted >= selectionLength',
@@ -130,7 +129,7 @@ export const recursiveWrapper = ({
         });
         console.log(startFound, charsHighlighted);
       }
-      continue;
+      return;
     }
 
     // Step 1:
@@ -148,7 +147,7 @@ export const recursiveWrapper = ({
         'focus',
         focus
       );
-      if (element !== anchor && element !== focus) continue; // If the element is not the anchor or focus, continue
+      if (element !== anchor && element !== focus) return; // If the element is not the anchor or focus, continue
       //  !(anchor instanceof HTMLElement) && !(focus instanceof HTMLElement);
 
       startFound = true;
@@ -235,7 +234,7 @@ export const recursiveWrapper = ({
     // If the text is all whitespace, ignore it
     if (highlightText?.match(/^\s*$/u)) {
       parent.normalize(); // Undo any 'splitText' operations
-      continue;
+      return;
     }
 
     console.log(
@@ -244,42 +243,32 @@ export const recursiveWrapper = ({
 
     // If we get here, highlight!
     // Wrap the highlighted text in a span with the highlight class name
-    const highlightNode = React.createElement(
-      OriginalText,
-      { key: key, backgroundColor: color, className: HIGHLIGHT_CLASS },
-      highlightTextEl.nodeValue
-    );
+    // const highlightNode = React.createElement(HighlightCard, {
+    //   phrase: highlightTextEl.nodeValue,
+    //   key: key,
+    // });
 
-    console.log(
-      'key',
-      key,
-      'highlightTextEl.nodeValue',
-      highlightTextEl.nodeValue
-    );
+    // console.log(
+    //   'key',
+    //   key,
+    //   'highlightTextEl.nodeValue',
+    //   highlightTextEl.nodeValue
+    // );
 
-    const container = document.createElement('span');
+    // const container = document.createElement('span');
 
-    ReactDOM.render(highlightNode, container);
+    // ReactDOM.render(highlightNode, container);
 
-    console.log(highlightNode);
+    // console.log(highlightNode);
+
+    const highlightNode = document.createElement('span');
+    highlightNode.style.backgroundColor = '#00d8ff';
+    highlightNode.textContent = highlightTextEl.nodeValue;
+    highlightTextEl.remove();
 
     highlightTextEl.remove();
-    parent.insertBefore(container, insertBeforeElement);
-  }
+    parent.insertBefore(highlightNode, insertBeforeElement);
+  });
 
   return [startFound, charsHighlighted];
 };
-
-// const OriginalText = styled.span<OriginalText>`
-//   background-color: ${(p) =>
-//     p.click || hover ? '#00d8ff' : '#55e1fa'} !important;
-//   cursor: pointer !important;
-// `;
-
-interface OriginalText {
-  backgroundColor: string;
-}
-const OriginalText = styled.span<OriginalText>`
-  background-color: ${(p) => p.backgroundColor} !important;
-  cursor: pointer !important;
-`;

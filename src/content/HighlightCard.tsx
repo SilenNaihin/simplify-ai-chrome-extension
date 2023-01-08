@@ -6,14 +6,15 @@ import {
   useWindowSize,
   useCalcBoxDim,
   useScrollPosition,
+  HIGHLIGHT_COLORS,
 } from './utils';
 
 interface HighlightCard {
-  phrase: string;
-  highlightRect: DOMRect;
+  phrase: any;
+  key: any;
 }
 
-const HighlightCard = ({ phrase, highlightRect }: HighlightCard) => {
+const HighlightCard = ({ phrase, key }: HighlightCard) => {
   const [clicked, setClicked] = useState<boolean>(true);
   const [width] = useWindowSize();
   const [boxWidth, boxMaxHeight] = useCalcBoxDim(width);
@@ -23,12 +24,16 @@ const HighlightCard = ({ phrase, highlightRect }: HighlightCard) => {
 
   const scrollPosition = useScrollPosition();
 
-  const textRef = useRef(null);
+  const textRef = useRef<HTMLInputElement>(null);
   useOutsideAlerter(textRef, () => setClicked(false));
+
+  const highlightRef = useRef<HTMLInputElement>(null);
 
   const updatePosition = () => {
     const root = document.documentElement;
     const rootRect = root.getBoundingClientRect();
+
+    const highlightRect = highlightRef?.current?.getBoundingClientRect();
 
     if (highlightRect) {
       `calculate the coordinates of the fixed box in relation to the bounding rect of the highlight `;
@@ -80,15 +85,15 @@ const HighlightCard = ({ phrase, highlightRect }: HighlightCard) => {
 
   return (
     <Span ref={textRef}>
-      {/* the highlight cannot go here, but has to have the useWindowSize */}
-
-      {/* <OriginalText
-        // key={key}
+      <OriginalText
+        ref={highlightRef}
+        key={key}
         onClick={() => setClicked(!clicked)}
         click={clicked}
+        color={HIGHLIGHT_COLORS}
       >
         {phrase}
-      </OriginalText> */}
+      </OriginalText>
       <HoverContainer
         maxHeight={boxMaxHeight}
         width={boxWidth}
@@ -112,10 +117,12 @@ const Span = styled.span`
 
 interface OriginalText {
   click: boolean;
-  //   hover: boolean;
+  color: any;
 }
+
 const OriginalText = styled.span<OriginalText>`
-  background-color: ${(p) => (p.click ? '#00d8ff' : '#55e1fa')} !important;
+  background-color: ${(p) =>
+    p.click ? p.color.active : p.color.inactive} !important;
   cursor: pointer !important;
 `;
 

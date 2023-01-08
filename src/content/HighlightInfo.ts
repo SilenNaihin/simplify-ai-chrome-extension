@@ -1,5 +1,4 @@
 interface HighlightInfo {
-  color: string;
   selectionString: string;
   anchor: Node | null;
   anchorOffset: number;

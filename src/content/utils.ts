@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 export const HIGHLIGHT_CLASS = 'SimplifyGPT-highlight';
+export const HIGHLIGHT_COLORS = { active: '#00d8ff', inactive: '#55e1fa' };
 
 // Hook that runs function on clicks outside of the passed ref
 export const useOutsideAlerter = (ref: any, handleClick: Function) => {

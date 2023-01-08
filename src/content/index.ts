@@ -1,6 +1,3 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import HighlightCard from './HighlightCard';
 import { highlightText } from './highlightText';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -52,33 +49,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       );
       console.log('Array is stored in Chrome storage', highlightArray);
 
-      // background-color: ${(p) => (p.click ? '#00d8ff' : '#55e1fa')} !important;
-      const highlightColor = '#55e1fa';
-
       highlightText({
         selectionString,
         ancestor,
         selection,
-        highlightColor,
         key,
       });
-
-      const component = React.createElement(HighlightCard, {
-        phrase: message.data.selectionText,
-        highlightRect: range.getBoundingClientRect(),
-      });
-      const container = document.createElement('span');
-
-      // console.log(
-      //   'component, range',
-      //   component,
-      //   range,
-      //   range?.extractContents()
-      // );
-      // render component into the container element
-      ReactDOM.render(component, container);
-
-      document.body.insertBefore(container, document.body.firstChild);
 
       // Deselect text
       if (selection.removeAllRanges) selection.removeAllRanges();

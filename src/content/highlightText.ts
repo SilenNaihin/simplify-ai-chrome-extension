@@ -2,6 +2,7 @@ import HighlightInfo from './HighlightInfo';
 import styled from 'styled-components';
 import React from 'react';
 import { HIGHLIGHT_CLASS } from './utils';
+import ReactDOM from 'react-dom';
 
 interface HighlightText {
   selectionString: string;
@@ -45,14 +46,15 @@ export const highlightText = ({
       charsHighlighted: 0,
     });
   } catch (e) {
+    console.log('false', e);
     return false;
   }
 };
 interface RecursiveWrapper {
   ancestor: HTMLElement;
   highlightInfo: HighlightInfo;
-  startFound: any;
-  charsHighlighted: any;
+  startFound: boolean;
+  charsHighlighted: number;
 }
 
 export const recursiveWrapper = ({
@@ -72,29 +74,63 @@ export const recursiveWrapper = ({
   }: HighlightInfo = highlightInfo;
   const selectionLength = selectionString.length;
 
+  console.log(
+    'HIGHLIGHT_INFO',
+    highlightInfo,
+    'ancestor',
+    ancestor,
+    'startFound',
+    startFound,
+    'charsHighlighted',
+    charsHighlighted
+  );
+
   // get parent of ancestor
   // ORIGINAL: ancestor.contents().each((_index, element)
   // potential:
-  //   for (let i = 0; i < ancestor.children.length; i++) {
-  //     let element = ancestor.children[i];
-  //     // logic here
-  //   }
-  Array.from(ancestor.childNodes).forEach((element) => {
-    const htmlElement = element as HTMLElement;
+  // Array.from(ancestor.childNodes).forEach((element) => {
+  //   const htmlElement = element as HTMLElement;
+
+  for (let x = 0; x < ancestor.childNodes.length; x++) {
+    console.log('-------------------', x);
+    console.log(
+      'ancestor',
+      ancestor,
+      'ancestor.childNodes',
+      ancestor.childNodes,
+      'ancestor.childNodes[x]',
+      ancestor.childNodes[x],
+      'typeof',
+      typeof ancestor.childNodes[x]
+    );
+    const element = ancestor.childNodes[x];
+    console.log('htmlElement', element);
+    console.log(
+      'charsHighlighted >= selectionLength',
+      charsHighlighted >= selectionLength
+    );
     if (charsHighlighted >= selectionLength) return; // Stop early if we are done highlighting
 
-    if (element.nodeType !== Node.TEXT_NODE) {
+    console.log(
+      'element.nodeType !== Node.TEXT_NODE',
+      element.nodeType !== Node.TEXT_NODE,
+      'element instanceof Element',
+      element instanceof HTMLElement
+    );
+    if (element.nodeType !== Node.TEXT_NODE && element instanceof HTMLElement) {
       // Only look at visible nodes because invisible nodes aren't included in the selected text
-      const style = getComputedStyle(htmlElement);
+      const style = getComputedStyle(element);
       if (style.display !== 'none' && style.visibility !== 'hidden') {
+        // @ts-ignore
         [startFound, charsHighlighted] = recursiveWrapper({
-          ancestor: htmlElement,
+          ancestor: element,
           highlightInfo,
           startFound,
           charsHighlighted,
         });
+        console.log(startFound, charsHighlighted);
       }
-      return;
+      continue;
     }
 
     // Step 1:
@@ -102,7 +138,17 @@ export const recursiveWrapper = ({
     // since you can highlight from left to right or right to left
     let startIndex = 0;
     if (!startFound) {
-      if (element !== anchor && element !== focus) return; // If the element is not the anchor or focus, continue
+      console.log(
+        'startFound',
+        startFound,
+        'element',
+        element,
+        'anchor',
+        anchor,
+        'focus',
+        focus
+      );
+      if (element !== anchor && element !== focus) continue; // If the element is not the anchor or focus, continue
       //  !(anchor instanceof HTMLElement) && !(focus instanceof HTMLElement);
 
       startFound = true;
@@ -112,11 +158,30 @@ export const recursiveWrapper = ({
           ...(element === focus ? [focusOffset] : []),
         ]
       );
+      console.log('new startFound', startFound, 'new startIndex', startIndex);
     }
+
+    console.log(
+      'element',
+      element,
+      'nodeValue',
+      element.nodeValue,
+      'parentElement',
+      element.parentElement
+    );
 
     // Step 2:
     // If we get here, we are in a text node, the start was found and we are not done highlighting
-    const { nodeValue, parentElement: parent }: any = htmlElement;
+    const { nodeValue, parentElement: parent }: any = element;
+
+    console.log(
+      'nodeValue',
+      nodeValue,
+      'parentElement',
+      parent,
+      'startIndex',
+      startIndex
+    );
 
     if (startIndex > nodeValue.length) {
       // Start index is beyond the length of the text node, can't find the highlight
@@ -127,7 +192,10 @@ export const recursiveWrapper = ({
     }
 
     // Split the text content into three parts, the part before the highlight, the highlight and the part after the highlight:
-    const highlightTextEl = nodeValue.splitText(startIndex);
+    const textNode = element as Text;
+    const highlightTextEl = textNode.splitText(startIndex);
+
+    console.log('highlightTextEl', highlightTextEl, 'startIndex', startIndex);
 
     // Instead of simply blindly highlighting the text by counting characters,
     // we check if the text is the same as the selection string.
@@ -165,10 +233,14 @@ export const recursiveWrapper = ({
     const highlightText = highlightTextEl.nodeValue;
 
     // If the text is all whitespace, ignore it
-    if (highlightText.match(/^\s*$/u)) {
+    if (highlightText?.match(/^\s*$/u)) {
       parent.normalize(); // Undo any 'splitText' operations
-      return;
+      continue;
     }
+
+    console.log(
+      `${elementCharCount} chars highlighted in text node ${nodeValue}`
+    );
 
     // If we get here, highlight!
     // Wrap the highlighted text in a span with the highlight class name
@@ -178,9 +250,22 @@ export const recursiveWrapper = ({
       highlightTextEl.nodeValue
     );
 
+    console.log(
+      'key',
+      key,
+      'highlightTextEl.nodeValue',
+      highlightTextEl.nodeValue
+    );
+
+    const container = document.createElement('span');
+
+    ReactDOM.render(highlightNode, container);
+
+    console.log(highlightNode);
+
     highlightTextEl.remove();
-    parent.insertBefore(highlightNode, insertBeforeElement);
-  });
+    parent.insertBefore(container, insertBeforeElement);
+  }
 
   return [startFound, charsHighlighted];
 };

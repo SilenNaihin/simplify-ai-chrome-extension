@@ -69,16 +69,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
       const container = document.createElement('span');
 
-      console.log(
-        'component, range',
-        component,
-        range,
-        range?.extractContents()
-      );
+      // console.log(
+      //   'component, range',
+      //   component,
+      //   range,
+      //   range?.extractContents()
+      // );
       // render component into the container element
       ReactDOM.render(component, container);
-      // insert container element into the DOM in place of the range object
-      range.insertNode(container);
+
+      document.body.insertBefore(container, document.body.firstChild);
 
       // Deselect text
       if (selection.removeAllRanges) selection.removeAllRanges();

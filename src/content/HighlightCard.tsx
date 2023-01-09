@@ -36,6 +36,8 @@ const HighlightCard = ({ phrase, key }: HighlightCard) => {
 
     const highlightRect = highlightRef?.current?.getBoundingClientRect();
 
+    // FIXME: overlaps z-index of elements outside of container
+    // FIXME: needs to transfer top once the true bottom of the page has been scrolled to
     if (highlightRect) {
       `calculate the coordinates of the fixed box in relation to the bounding rect of the highlight `;
       const { left, top, right, bottom, width } = highlightRect;
@@ -150,6 +152,13 @@ const HoverContainer = React.memo(styled.div<HoverContainer>`
   overflow: auto !important;
   white-space: normal !important;
   contain: initial !important;
+
+  &::-webkit-scrollbar {
+    --tw-border-opacity: 1;
+    background-color: rgba(217,217,227,.8);
+    border-radius: 9999px;
+    border-width: 1px;
+  }
 
   @import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
   font-family: font-family: 'Lato', sans-serif !important;

@@ -7,6 +7,7 @@ import {
   useCalcBoxDim,
   useScrollPosition,
   HIGHLIGHT_COLORS,
+  HIGHLIGHT_CLASS,
 } from './utils';
 
 interface HighlightCard {
@@ -84,7 +85,7 @@ const HighlightCard = ({ phrase, key }: HighlightCard) => {
   }, [scrollPosition, width]);
 
   return (
-    <Span ref={textRef}>
+    <Span className={HIGHLIGHT_CLASS} ref={textRef}>
       <OriginalText
         ref={highlightRef}
         key={key}

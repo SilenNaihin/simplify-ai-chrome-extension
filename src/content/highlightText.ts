@@ -64,6 +64,7 @@ export const recursiveWrapper = ({
   const {
     anchor,
     focus,
+    key,
     anchorOffset,
     focusOffset,
     selectionString,
@@ -98,9 +99,9 @@ export const recursiveWrapper = ({
       'ancestor.childNodes',
       ancestor.childNodes,
       'ancestor.childNodes[x]',
-      ancestor.childNodes[x],
+      ancestor.childNodes[x + 1],
       'typeof',
-      typeof ancestor.childNodes[x]
+      typeof ancestor.childNodes[x + 1]
     );
 
     console.log('htmlElement', element);
@@ -171,16 +172,31 @@ export const recursiveWrapper = ({
 
     // Step 2:
     // If we get here, we are in a text node, the start was found and we are not done highlighting
-    const { nodeValue, parentElement: parent }: any = element;
+    const { nodeValue }: any = element;
+    let parentNode: any = element.parentNode;
 
     console.log(
       'nodeValue',
       nodeValue,
-      'parentElement',
-      parent,
+      'parentNode',
+      parentNode,
       'startIndex',
-      startIndex
+      startIndex,
+      'ancestor.childNodes',
+      ancestor.childNodes[x + 1]
     );
+
+    // if it's a whitespace text node
+    if (ancestor.childNodes[x + 1]) {
+      parentNode = ancestor.childNodes[x + 1].parentNode;
+      console.log(
+        'sometimes parentNode',
+        '__________________________________',
+        ancestor.childNodes[x + 1],
+        ancestor.childNodes[x + 1].parentNode,
+        ancestor.childNodes[x + 1].parentElement
+      );
+    }
 
     if (startIndex > nodeValue.length) {
       // Start index is beyond the length of the text node, can't find the highlight
@@ -225,7 +241,7 @@ export const recursiveWrapper = ({
 
     // If textElement is wrapped in a .highlighter--highlighted span, do not add this highlight
     // as it is already highlighted, but still count the number of charsHighlighted
-    if (parent.classList.contains(HIGHLIGHT_CLASS)) return;
+    if (parentNode.classList.contains(HIGHLIGHT_CLASS)) return;
 
     const elementCharCount = i - startIndex; // Number of chars to highlight in this particular element
     const insertBeforeElement = highlightTextEl.splitText(elementCharCount);
@@ -233,7 +249,7 @@ export const recursiveWrapper = ({
 
     // If the text is all whitespace, ignore it
     if (highlightText?.match(/^\s*$/u)) {
-      parent.normalize(); // Undo any 'splitText' operations
+      parentNode.normalize(); // Undo any 'splitText' operations
       return;
     }
 
@@ -243,31 +259,17 @@ export const recursiveWrapper = ({
 
     // If we get here, highlight!
     // Wrap the highlighted text in a span with the highlight class name
-    // const highlightNode = React.createElement(HighlightCard, {
-    //   phrase: highlightTextEl.nodeValue,
-    //   key: key,
-    // });
+    const highlightNode = React.createElement(HighlightCard, {
+      phrase: highlightTextEl.nodeValue,
+      key: key,
+    });
 
-    // console.log(
-    //   'key',
-    //   key,
-    //   'highlightTextEl.nodeValue',
-    //   highlightTextEl.nodeValue
-    // );
+    const container = document.createElement('span');
 
-    // const container = document.createElement('span');
-
-    // ReactDOM.render(highlightNode, container);
-
-    // console.log(highlightNode);
-
-    const highlightNode = document.createElement('span');
-    highlightNode.style.backgroundColor = '#00d8ff';
-    highlightNode.textContent = highlightTextEl.nodeValue;
-    highlightTextEl.remove();
+    ReactDOM.render(highlightNode, container);
 
     highlightTextEl.remove();
-    parent.insertBefore(highlightNode, insertBeforeElement);
+    parentNode.insertBefore(container, insertBeforeElement);
   });
 
   return [startFound, charsHighlighted];

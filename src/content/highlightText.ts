@@ -1,9 +1,6 @@
 import HighlightInfo from './HighlightInfo';
+import { HIGHLIGHT_CLASS, HIGHLIGHT_COLORS } from './utils';
 import styled from 'styled-components';
-import React from 'react';
-import { HIGHLIGHT_CLASS } from './utils';
-import ReactDOM from 'react-dom';
-import HighlightCard from './HighlightCard';
 
 interface HighlightText {
   selectionString: string;
@@ -262,17 +259,12 @@ export const recursiveWrapper = ({
 
       // If we get here, highlight!
       // Wrap the highlighted text in a span with the highlight class name
-      const highlightNode = React.createElement(HighlightCard, {
-        phrase: highlightTextEl.nodeValue,
-        key: key,
-      });
-
-      const container = document.createElement('span');
-
-      ReactDOM.render(highlightNode, container);
-
+      const highlightNode = document.createElement('span');
+      highlightNode.classList.add(HIGHLIGHT_CLASS);
+      highlightNode.style.backgroundColor = HIGHLIGHT_COLORS.active;
+      highlightNode.textContent = highlightTextEl.nodeValue;
       highlightTextEl.remove();
-      parentElement.insertBefore(container, insertBeforeElement);
+      parentElement.insertBefore(highlightNode, insertBeforeElement);
     }
   });
 

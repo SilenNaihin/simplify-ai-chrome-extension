@@ -16,23 +16,23 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    // const port = chrome.runtime.connect();
-    // const listener = (msg: any) => {
-    //   if (msg.text) {
-    //     setAnswer(msg);
-    //   } else if (msg.error) {
-    //     setError(msg.error);
-    //   } else {
-    //     setError('EXCEPTION');
-    //   }
-    // };
-    // port.onMessage.addListener(listener);
-    // port.postMessage({ question: phrase });
-    // return () => {
-    //   port.onMessage.removeListener(listener);
-    //   port.disconnect();
-    // };
-    setError('EXCEPTION');
+    const port = chrome.runtime.connect();
+    const listener = (msg: any) => {
+      if (msg.text) {
+        setAnswer(msg);
+      } else if (msg.error) {
+        setError(msg.error);
+      } else {
+        setError('EXCEPTION');
+      }
+    };
+    port.onMessage.addListener(listener);
+    port.postMessage({ question: phrase });
+    return () => {
+      port.onMessage.removeListener(listener);
+      port.disconnect();
+    };
+    // setError('EXCEPTION'); this is to test with the above commented out to not get rate limted
   }, [phrase, retry]);
 
   // retry error on focus
@@ -56,6 +56,14 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
       'font-size': '14px !important',
       'text-decoration': 'none !important',
       color: '#000 !important',
+      overflow: 'auto !important',
+      'white-space': 'normal !important',
+    },
+    code: {
+      'line-height': '1.5 !important',
+      'text-align': 'left !important',
+      'font-size': '14px !important',
+      'text-decoration': 'none !important',
       overflow: 'auto !important',
       'white-space': 'normal !important',
     },
@@ -126,10 +134,7 @@ const GPTResponse = ({ phrase, clicked }: GPTResponse) => {
           code: ({ node, ...props }) => (
             <code
               style={{
-                all: 'revert',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-all',
-                ...styles.general,
+                ...styles.code,
               }}
               {...props}
             />

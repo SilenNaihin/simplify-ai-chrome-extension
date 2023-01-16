@@ -1,4 +1,8 @@
 import { highlightText } from './highlightText';
+import ReactDOM from 'react-dom';
+import HighlightCard from './HighlightCard';
+import styled from 'styled-components';
+import React from 'react';
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log('before message type', message);
@@ -55,6 +59,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         selection,
         key,
       });
+
+      // const highlightNode = React.createElement(HighlightCard, {
+      //   phrase: highlightTextEl.nodeValue,
+      //   key: key,
+      // });
+
+      // const container = document.createElement('span');
+
+      // ReactDOM.render(highlightNode, container);
+
+      // parentElement.insertBefore(container, insertBeforeElement);
 
       // Deselect text
       if (selection.removeAllRanges) selection.removeAllRanges();

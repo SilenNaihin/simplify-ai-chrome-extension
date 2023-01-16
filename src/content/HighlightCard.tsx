@@ -38,6 +38,7 @@ const HighlightCard = ({ phrase, key }: HighlightCard) => {
 
     // FIXME: overlaps z-index of elements outside of container
     // FIXME: needs to transfer top once the true bottom of the page has been scrolled to
+    // FIXME: there's a bug that adjusts the position every millisecond
     if (highlightRect) {
       `calculate the coordinates of the fixed box in relation to the bounding rect of the highlight `;
       const { left, top, right, bottom, width } = highlightRect;
